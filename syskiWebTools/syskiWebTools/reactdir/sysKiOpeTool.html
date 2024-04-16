@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>システム企画部業務管理ツール</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/babel-standalone@6.26.0"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <style>
+        .submitButton{
+            padding: 10px 30px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 10px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"], select, textarea {
+            width: 50%;
+            padding: 12px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { AppBar, Toolbar, Typography, Button, Menu, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Modal, Backdrop, Fade } = MaterialUI;
+        const DropdownMenu = ({ title, menuItems, setCurrentApi }) => {
+            const [anchorEl, setAnchorEl] = React.useState(null);
+        
+            const handleMouseEnter = (event) => {
+                setAnchorEl(event.currentTarget);
+            };
+        
+            const handleClose = () => {
+                setAnchorEl(null);
+            };
+        
+            return (
+                <div>
+                    <Button
+                        color="inherit"
+                        aria-controls="simple-menu"
+                        aria-haspopup="true"
+                        onMouseEnter={handleMouseEnter}
+                    >
+                        {title}
+                    </Button>
+                    <Menu
+                        id="simple-menu"
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleClose}
+                        PaperProps={{
+                            onMouseLeave: handleClose
+                        }}
+                    >
+                        {menuItems.map(item => (
+                            <MenuItem key={item.label} onClick={() => {
+                                setCurrentApi(item.api);
+                                handleClose();
+                            }}>
+                                {item.label}
+                            </MenuItem>
+                        ))}
+                    </Menu>
+                </div>
+            );
+        };
+        const App = () => {
+            const [currentApi, setCurrentApi] = React.useState(null);
+
+            const manageMenuItems = [
+                { label: '稼働状況照会', api: 'editableTable' },
+            ]
+
+            const inquiryMenuItems = [
+                { label: '課題一覧取得', api: 'taskCount' },
+            ]
+
+            const userMenuItems = [
+                { label: 'カスタム属性追加', api: 'customAttribute' },
+            ]
+
+            const projectMenuItems = [
+                { label: 'プロジェクトユーザ追加', api: 'userAdd'},
+                { label: 'プロジェクトユーザ削除', api: 'userDel'}
+            ]
+
+            return (
+                <div>
+                    <AppBar position="static">
+                        <Toolbar>
+                            <Typography variant="h5" style={{ flexGrow: 1 }}>
+                                システム企画部　業務管理ツール
+                            </Typography>
+                            <DropdownMenu title="管理系" menuItems={manageMenuItems} setCurrentApi={setCurrentApi} />
+                            <DropdownMenu title="照会系" menuItems={inquiryMenuItems} setCurrentApi={setCurrentApi} />
+                            <DropdownMenu title="ユーザ操作系" menuItems={userMenuItems} setCurrentApi={setCurrentApi} />
+                            <DropdownMenu title="プロジェクト操作系" menuItems={projectMenuItems} setCurrentApi={setCurrentApi} />
+                        </Toolbar>
+                    </AppBar>
+                    {currentApi === 'customAttribute' && <CustomAttributeForm />}
+                    {currentApi === 'issues' && <IssuesForm />}
+                    {currentApi === 'editableTable' && <EditableTableForm />}
+                </div>
+            );
+        };
+
+        const CustomAttributeForm = () => {
+            const [apiKey, setApiKey] = React.useState('');
+            const [projectId, setProjectId] = React.useState('');
+            const [typeId, setTypeId] = React.useState('');
+            const [name, setName] = React.useState('');
+            const [required, setRequired] = React.useState(false);
+            const [itemString, setItemString] = React.useState('');
+
+            const isTypeSelected = ['5','6','7','8'].includes(typeId);
+
+            const [log, setLog] = React.useState(null);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                // 必須項目チェック
+                if (!apiKey || !projectId || !typeId || !name) {
+                    alert('必須項目が入力されていません');
+                    return;
+                }
+                if (typeId === '6' && !itemString) {
+                    alert('リスト項目が入力されていません');
+                    return;
+                }
+            
+                const formData = new URLSearchParams();
+                formData.append('typeId', typeId);
+                formData.append('name', name);
+                if (typeId === '6') {
+                    itemString.split(',').forEach(item => formData.append('items[]', item.trim()));
+                }
+                formData.append('required', required);
+            
+                fetch(`https://isp-sekkei.backlog.com/api/v2/projects/${projectId}/customFields?apiKey=${apiKey}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: formData
+                })
+                .then(response => {
+                    setLog({
+                        statusCode: response.status,
+                        response: null
+                    });
+                    return response.json();
+                })
+                .then(data => {
+                    setLog(prevLog => ({ ...prevLog, response: data }));
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    setLog(prevLog => ({ ...prevLog, response: error }));
+                });
+            };
+
+            return (
+                <React.Fragment>
+                    <h1>カスタム属性追加ツール</h1>
+                    <form onSubmit={handleSubmit}>
+                        <label htmlFor="apiKey">APIキー(必須)：</label><br/>
+                        <input type="text" id="apiKey" value={apiKey} onChange={e => setApiKey(e.target.value)} /><br/>
+
+                        <label htmlFor="projectId">プロジェクトID（必須）：</label><br/>
+                        <input type="text" id="projectId" value={projectId} onChange={e => setProjectId(e.target.value)} /><br/>
+                    
+                        <label htmlFor="typeId">属性タイプ（必須）：</label><br/>
+                        <select id="typeId" value={typeId} onChange={e => setTypeId(e.target.value)}>
+                            <option value="">選択してください</option>
+                            <option value="1">文字列</option>
+                            <option value="2">文章</option>
+                            <option value="3">数値</option>
+                            <option value="4">日付</option>
+                            <option value="5">単一リスト</option>
+                            <option value="6">複数リスト</option>
+                            <option value="7">チェックボックス</option>
+                            <option value="8">ラジオ</option>
+                        </select><br/>
+                        <label htmlFor="name">属性名(必須):</label><br/>
+                        <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} /><br/>
+                        {isTypeSelected && (
+                            <div>
+                                <label htmlFor="items">
+                                    項目： <small>※複数項目を定義する場合、「,」区切りで入力してください（例：リンゴ,みかん,バナナ）</small>
+                                </label><br/>
+                                <input
+                                    type="text"
+                                    id="items"
+                                    value={itemString}
+                                    onChange={(e) => setItemString(e.target.value)}
+                                /><br/>
+                            </div>
+                        )}
+                        <input type="checkbox" id="required" checked={required} onChange={e => setRequired(e.target.checked)} />
+                        <label htmlFor="required">属性の入力必須化</label><br/>
+                        <input class="submitButton" type="submit" value="カスタム属性作成" />
+                    </form>
+
+                    {log && (
+                        <div>
+                            <h3>実行ログ:</h3>
+                            {log.statusCode && (
+                                <div>
+                                    <strong>HTTPリクエスト結果：</strong>{log.statusCode}
+                                </div>
+                            )}
+                            {log.response && (
+                                <div>
+                                    <strong>HTTPレスポンス:</strong>
+                                    <pre>{JSON.stringify(log.response, null, 2)}</pre>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </React.Fragment>
+            );
+        };
+
+        const taskCount = () => {
+            return (
+                <React.Fragment>
+                    <h1>稼働状況照会ツール</h1>
+                    <form onSubumit={handleSubmitTasks}>
+                        <h2>課題数最新化</h2>
+                        <p>※正確な稼働管理のために都度課題数の最新化をする機能です。稼働管理表の利用前に押下してください</p>
+                        <input class="submitButton" type="submit" value="課題数の最新化" />
+                    </form>
+                    <br/>
+                </React.Fragment>
+            )
+        }
+
+        const EditableTableForm = () => {
+            const [rows, setRows] = React.useState([]);
+            const [apiKey, setApiKey] = React.useState('');
+
+            React.useEffect(() => {
+                fetch('https://localhost:8080/api/getJoinTable')
+                    .then(response => response.json())
+                    .then(data => setRows(data))
+                    .catch(error => console.error("Error:", error));
+            }, []);
+
+            const [openModal, setOpenModal] = React.useState(false);
+
+            const handleOpenModal = () => {
+                setOpenModal(true);
+            };
+        
+            const handleCloseModal = () => {
+                setOpenModal(false);
+            };
+
+            const handleSubmitTable = (e) => {
+                e.preventDefault();
+                // 必須項目チェック
+                if (!apiKey || !projectId || !typeId || !name) {
+                    alert('必須項目が入力されていません');
+                    return;
+                }
+                if (typeId === '6' && !itemString) {
+                    alert('リスト項目が入力されていません');
+                    return;
+                }
+            
+                const formData = new URLSearchParams();
+                formData.append('typeId', typeId);
+                formData.append('name', name);
+                if (typeId === '6') {
+                    itemString.split(',').forEach(item => formData.append('items[]', item.trim()));
+                }
+                formData.append('required', required);
+            
+                fetch(`https://isp-sekkei.backlog.com/api/v2/projects/${projectId}/customFields?apiKey=${apiKey}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: formData
+                })
+                .then(response => {
+                    setLog({
+                        statusCode: response.status,
+                        response: null
+                    });
+                    return response.json();
+                })
+                .then(data => {
+                    setLog(prevLog => ({ ...prevLog, response: data }));
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    setLog(prevLog => ({ ...prevLog, response: error }));
+                });
+            };
+
+
+            const handleSubmitTasks = (e) => {
+                e.preventDefault();
+                // 必須項目チェック
+                if (!apiKey || !projectId || !typeId || !name) {
+                    alert('必須項目が入力されていません');
+                    return;
+                }
+                if (typeId === '6' && !itemString) {
+                    alert('リスト項目が入力されていません');
+                    return;
+                }
+            
+                const formData = new URLSearchParams();
+                formData.append('typeId', typeId);
+                formData.append('name', name);
+                if (typeId === '6') {
+                    itemString.split(',').forEach(item => formData.append('items[]', item.trim()));
+                }
+                formData.append('required', required);
+            
+                fetch(`https://isp-sekkei.backlog.com/api/v2/projects/${projectId}/customFields?apiKey=${apiKey}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: formData
+                })
+                .then(response => {
+                    setLog({
+                        statusCode: response.status,
+                        response: null
+                    });
+                    return response.json();
+                })
+                .then(data => {
+                    setLog(prevLog => ({ ...prevLog, response: data }));
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    setLog(prevLog => ({ ...prevLog, response: error }));
+                });
+            };
+
+            //MaterialUIを使ったファイルアップロードアイテム
+            const FileUploadButton = ({ onFileSelect }) => {
+                const inputRef = React.useRef();
+            
+                const handleClick = () => {
+                    inputRef.current.click();
+                };
+            
+                const handleChange = (event) => {
+                    if (event.target.files.length > 0) {
+                        onFileSelect(event.target.files[0]);
+                    }
+                };
+            
+                return (
+                    <div>
+                        <input
+                            ref={inputRef}
+                            type="file"
+                            style={{ display: 'none' }}
+                            onChange={handleChange}
+                        />
+                        <Button
+                            color="primary"
+                            variant="contained"
+                            onClick={handleClick}
+                        >
+                            ファイルを選択
+                        </Button>
+                    </div>
+                );
+            };
+            
+
+            // MaterialUIを使ったファイルアップロードアイテムに対するアクションロジック
+            const handleUpdateCSV = (event) => {
+                event.preventDefault();
+                // ここにCSVアップロードの処理を書きます
+                alert('ファイルがアップロードされました');
+            };
+
+            const CsvDownloadModal = ({ open, handleClose }) => {
+                return (
+                    <Modal
+                        open={open}
+                        onClose={handleClose}
+                        closeAfterTransition
+                        BackdropComponent={Backdrop}
+                        BackdropProps={{
+                            timeout: 500,
+                        }}
+                    >
+                        <Fade in={open}>
+                            <div style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                width: 400,
+                                backgroundColor: 'white',
+                                boxShadow: 24,
+                                padding: 4,
+                            }}>
+                                {/* ここにダウンロード方法の説明を入れる */}
+                                <p>CSVダウンロードの手順をここに記載します。</p>
+                            </div>
+                        </Fade>
+                    </Modal>
+                );
+            };
+        
+            return (
+                <React.Fragment>
+                    <form onSubmit={handleSubmitTable}>
+                        <h2>稼働管理表</h2>
+                        <TableContainer component={Paper}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell rowSpan={2}>SEQNO</TableCell>
+                                        <TableCell rowSpan={2}>案件名</TableCell>
+                                        <TableCell rowSpan={2}>案件T</TableCell>
+                                        <TableCell rowSpan={2}>案件担当者</TableCell>
+                                        <TableCell rowSpan={2}>案件規模</TableCell>
+                                        <TableCell colSpan={2} align="center">案件検討状況</TableCell>
+                                        <TableCell colSpan={3} align="center">課題数（要求部門＋開発）</TableCell>
+                                        <TableCell colSpan={2} align="center">想定打合せ時間</TableCell>
+                                        <TableCell colSpan={2} align="center">その他作業時間（備考欄要記載）</TableCell>
+                                        <TableCell rowSpan={2}>合計工数</TableCell>
+                                        <TableCell rowSpan={2}>備考</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>状況</TableCell>
+                                        <TableCell>対応中工数</TableCell>
+                                        <TableCell>課題残数(シス企関連)</TableCell>
+                                        <TableCell>全課題数(参考)</TableCell>
+                                        <TableCell>対応中工数</TableCell>
+                                        <TableCell>直近2週間 想定時間(h)</TableCell>
+                                        <TableCell>対応中工数</TableCell>
+                                        <TableCell>直近2週間 想定時間(h)</TableCell>
+                                        <TableCell>対応中工数</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {rows.map((row) => (
+                                        <TableRow key={row.seq_no}>
+                                            <TableCell>
+                                                <TextField>
+                                                    type="helperText"
+                                                    value={row.seq_no}
+                                                </TextField>
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField>
+                                                    type="helperText"
+                                                    value={row.project}
+                                                </TextField>
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField>
+                                                    type="helperText"
+                                                    value={row.team}
+                                                </TextField>
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField>
+                                                    type="helperText"
+                                                    value={row.prsnInChrg}
+                                                </TextField>
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField>
+                                                    type="helperText"
+                                                    value={row.prjctSize}
+                                                </TextField>
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField>
+                                                    type="helperText"
+                                                    value={row.prjctSts}
+                                                </TextField>
+                                            </TableCell>
+                                            <TableCell>
+                                                {
+                                                    row.prjctSts === '要求定義中' ?
+                                                    <TextField value={row.prjctMnHrsValue}/>:
+                                                    <TextField value="-"/>
+                                                }
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField value={row.remainTaskSys} />                                                    
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField value={row.allTaskSys} />                                                    
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField value={row.crspndMnHrs} />                                                    
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField type="helperText" value={row.estMtgTimeTwWks} />
+                                            </TableCell>
+                                            <TableCell>
+                                                {
+                                                    row.prjctSts === '要求定義中' ?
+                                                    <TextField value={row.mtgMnHrs} />:
+                                                    <TextField value="-"/>
+                                                }
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField type="helperText" value={row.estwkTimeTwWks} />
+                                            </TableCell>
+                                            <TableCell>
+                                                {
+                                                    row.prjctSts === '要求定義中' ?
+                                                    <TextField value={row.wkMnHrs} />:
+                                                    <TextField value="-"/>
+                                                }
+                                            </TableCell>
+                                            <TableCell>
+                                                {
+                                                    row.prjctMnHrsValue + row.crspndMnHrs + row.mtgMnHrs + row.wkMnHrs
+                                                }
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField type="helperText" value={row.remarks} />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <input className="submitButton" type="submit" value="稼働表の更新" />
+                    </form>
+                    <br/>
+                    <form onSubmit={handleUpdateCSV}>
+                        <h2>課題状況最新化機能</h2>
+                        <p>※本機能ではBacklogから取得した課題一覧のCSVをアップロードすることができます。（CSVのダウンロード方法は<a href="#" onClick={handleOpenModal}>こちら</a>）<br/>
+                            　ここでCSVをアップロードすることで、最新の課題状況を反映することができます。<br/>
+                            　処理終了には数分かかることもありますがご了承ください。また、処理中にページを閉じるなどはお控えください。<br/>
+                            　必ずCSVは最新のものをダウンロードし、アップロードして下さい。 <br/>
+                            　最終更新日時：2024/4/10 10:00:00
+                        </p>
+                        {/* MaterialUIを使ったファイルのアップロードアイテム */}
+                        <FileUploadButton onFileSelect={(file) => console.log(file)} />
+                        <input className="submitButton" type="submit" value="CSVアップロード" />
+                        <CsvDownloadModal open={openModal} handleClose={handleCloseModal} />
+                    </form>
+                </React.Fragment>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
