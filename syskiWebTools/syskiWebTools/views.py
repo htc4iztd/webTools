@@ -6,6 +6,10 @@ from django.db import transaction
 from .models import Task
 import csv
 from io import StringIO
+from django.shortcuts import render
+
+def index(request):
+    return render(request, 'sysKiOpeTool.html')
 
 @csrf_exempt
 def upload_csv(request):
@@ -27,7 +31,3 @@ def upload_csv(request):
                 )
         return JsonResponse({'status': 'success'}, status=200)
     return HttpResponseBadRequest('Invalid request')
-
-# 他のビューの実装...
-# ここでは具体的なビューは示されていませんが、ボタンに応じた処理やロジックについては、
-# ボタンごとにビューを分けて定義するか、またはパラメータに応じて同一のビュー内で条件分岐を行います。
