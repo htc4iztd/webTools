@@ -1,6 +1,11 @@
 import React from 'react';
 
 function CountTask(){
+    function handleSubmitTasks(e) {
+        e.preventDefault();
+        // ここでタスク提出のロジックを処理します
+    }
+    
     return (
         <React.Fragment>
             <h1>稼働状況照会ツール</h1>
@@ -13,3 +18,5 @@ function CountTask(){
         </React.Fragment>
     )
 }
+
+export default CountTask;

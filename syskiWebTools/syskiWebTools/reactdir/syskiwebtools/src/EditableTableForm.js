@@ -1,8 +1,29 @@
 import React, { useState }  from 'react';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Button,
+    Modal,
+    Fade,
+    Backdrop,
+    Paper
+  } from '@mui/material';
+  
 
 function EditableTableForm(){
     const [rows, setRows] = React.useState([]);
     const [apiKey, setApiKey] = React.useState('');
+    const [projectId, setProjectId] = useState('');
+    const [typeId, setTypeId] = useState('');
+    const [name, setName] = useState('');
+    const [itemString, setItemString] = useState('');
+    const [required, setRequired] = useState(false);
+    const [log, setLog] = useState(null);
 
     React.useEffect(() => {
         fetch('https://localhost:8080/api/getJoinTable')
@@ -314,3 +335,5 @@ function EditableTableForm(){
         </React.Fragment>
     );
 }
+
+export default EditableTableForm;

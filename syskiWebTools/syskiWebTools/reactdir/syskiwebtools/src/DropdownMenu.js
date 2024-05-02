@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Menu, MenuItem } from '@mui/material';
 
-function DropdownMenu(){
+function DropdownMenu({ title, menuItems, setCurrentApi }){
     const [anchorEl, setAnchorEl] = React.useState(null);
         
     const handleMouseEnter = (event) => {
@@ -43,3 +43,5 @@ function DropdownMenu(){
         </div>
     );
 }
+
+export default DropdownMenu;

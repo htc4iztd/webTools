@@ -114,3 +114,6 @@ function CustomAttributeForm(){
         </React.Fragment>
     );
 }
+
+
+export default CustomAttributeForm;
