@@ -1,4 +1,4 @@
-import React, { useState }  from 'react';
+import React, { useState, useRef }  from 'react';
 import {
     Table,
     TableBody,
@@ -127,6 +127,7 @@ function EditableTableForm(){
 
     //MaterialUIを使ったファイルアップロードアイテム
     const FileUploadButton = ({ onFileSelect }) => {
+        const [fileName, setFileName] = useState('');
         const inputRef = React.useRef();
     
         const handleClick = () => {
@@ -134,8 +135,10 @@ function EditableTableForm(){
         };
     
         const handleChange = (event) => {
-            if (event.target.files.length > 0) {
-                onFileSelect(event.target.files[0]);
+            const file = event.target.files[0];
+            if (file) {
+                setFileName(file.name);
+                onFileSelect(file);
             }
         };
     
@@ -154,6 +157,7 @@ function EditableTableForm(){
                 >
                     ファイルを選択
                 </Button>
+                {fileName && <div style={{ marginTop: '10px' }}>選択されたファイル: {fileName}</div>}
             </div>
         );
     };
