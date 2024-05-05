@@ -16,7 +16,11 @@ import {
   
 
 function EditableTableForm(){
-    const [rows, setRows] = React.useState([]);
+    const [rows, setRows] = useState([]);
+    const [loading, setLoading] = useState([]);
+    const [loading2, setLoading2] = useState([]);
+    const [fileName, setFileName] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const fetchTableData = async () => {
         setLoading(true);
@@ -57,7 +61,6 @@ function EditableTableForm(){
 
     //MaterialUIを使ったファイルアップロードアイテム
     const FileUploadButton = ({ onFileSelect }) => {
-        const [fileName, setFileName] = useState('');
         const inputRef = React.useRef();
     
         const handleClick = () => {
@@ -68,7 +71,8 @@ function EditableTableForm(){
             const file = event.target.files[0];
             if (file) {
                 setFileName(file.name);
-                onFileSelect(file);
+                setSelectedFile(file); // 選択されたファイルを状態に保存
+                onFileSelect(file); // 親コンポーネントに選択されたファイルを渡す
             }
         };
     
@@ -96,21 +100,21 @@ function EditableTableForm(){
         event.preventDefault();
         
         // ファイルが選択されていなければ警告を出す
-        if (!file) {
+        if (!selectedFile) {
             alert('ファイルを選択してください');
             return;
         }
     
         // ファイルをFormDataオブジェクトに追加
         const formData = new FormData();
-        formData.append('file', file);
-    
+        formData.append('file', selectedFile);
+
         // アップロード処理中の状態を表示
-        setLoading(true);
+        setLoading2(true);
     
         try {
             // サーバーにファイルをPOST
-            const response = await fetch(apiUrl, {
+            const response = await fetch('http://localhost:8080/api/uploadCsv', {
                 method: 'POST',
                 body: formData,
             });
@@ -131,8 +135,12 @@ function EditableTableForm(){
             alert(`アップロードに失敗しました: ${error.message}`);
         } finally {
             // ローディング状態の解除
-            setLoading(false);
+            setLoading2(false);
         }
+    };
+
+    const handleFileSelect = (file) => {
+        setSelectedFile(file);
     };
 
     const CsvDownloadModal = ({ open, handleClose }) => {
@@ -301,9 +309,10 @@ function EditableTableForm(){
                     　最終更新日時：2024/4/10 10:00:00
                 </p>
                 {/* MaterialUIを使ったファイルのアップロードアイテム */}
-                <FileUploadButton onFileSelect={(file) => console.log(file)} />
+                <FileUploadButton onFileSelect={handleFileSelect} />
                 <input className="submitButton" type="submit" value="CSVアップロード" />
                 <CsvDownloadModal open={openModal} handleClose={handleCloseModal} />
+                {loading2 && <p>Loading...</p>}
             </form>
         </React.Fragment>
     );
