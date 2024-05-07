@@ -5,3 +5,6 @@ from typing import List
 class CategorizedElements(BaseModel):
     tables: List[str]
     texts: List[str]
+
+class OperationUploadData(BaseModel):
+    request: List[str]

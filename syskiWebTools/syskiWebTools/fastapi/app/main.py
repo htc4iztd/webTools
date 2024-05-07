@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, Form, APIRouter,Body
-from models.models import CategorizedElements
+from models.models import CategorizedElements, OperationUploadData
 from routers import dataLoad, multiPrompts, multiEmb, getFileList, requestSmartContract, functionCalling
 import os
 import logging
@@ -93,4 +93,16 @@ def call_smart_contract(
     recipient: str = Body(...)
 ):
     result = requestSmartContract.main(address,amount,recipient)
+    return result
+
+@app.get("/getJoinedTable")
+def get_joined_table():
+    result = requestGetOperationTable.main()
+    return result
+
+@app.post("/uploadOperationData")
+def upload_operation_Data(
+    Request: OperationUploadData.request
+):
+    result = requestOperationDataUpload.main(Request)
     return result
