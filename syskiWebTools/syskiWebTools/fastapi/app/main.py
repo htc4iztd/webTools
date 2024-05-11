@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, Form, APIRouter,Body
 from models.models import CategorizedElements, OperationUploadData
-from routers import dataLoad, multiPrompts, multiEmb, getFileList, requestSmartContract, functionCalling
+from routers import dataLoad, multiPrompts, multiEmb, getFileList
 import os
 import logging
 from fastapi.middleware.cors import CORSMiddleware
@@ -102,7 +102,7 @@ def get_joined_table():
 
 @app.post("/uploadOperationData")
 def upload_operation_Data(
-    Request: OperationUploadData.request
+    request: OperationUploadData
 ):
-    result = requestOperationDataUpload.main(Request)
+    result = requestOperationDataUpload.main(request)
     return result

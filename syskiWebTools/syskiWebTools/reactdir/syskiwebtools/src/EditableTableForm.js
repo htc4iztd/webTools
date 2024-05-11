@@ -114,7 +114,7 @@ function EditableTableForm(){
     
         try {
             // サーバーにファイルをPOST
-            const response = await fetch('http://localhost:8080/api/uploadCsv', {
+            const response = await fetch('http://localhost:8000/uploadOperationData', {
                 method: 'POST',
                 body: formData,
             });
@@ -308,7 +308,6 @@ function EditableTableForm(){
                     　必ずCSVは最新のものをダウンロードし、アップロードして下さい。 <br/>
                     　最終更新日時：2024/4/10 10:00:00
                 </p>
-                {/* MaterialUIを使ったファイルのアップロードアイテム */}
                 <FileUploadButton onFileSelect={handleFileSelect} />
                 <input className="submitButton" type="submit" value="CSVアップロード" />
                 <CsvDownloadModal open={openModal} handleClose={handleCloseModal} />
