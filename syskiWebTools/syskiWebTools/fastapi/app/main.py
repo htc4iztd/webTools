@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form, APIRouter,Body
+from fastapi import FastAPI, File, UploadFile, Form, Body
 from models.models import CategorizedElements, OperationUploadData
 from routers import dataLoad, multiPrompts, multiEmb, getFileList
 import os
@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
-router = APIRouter()
 
 origins = [
     "http://localhost:3000",  # Next.jsの開発サーバーのオリジン

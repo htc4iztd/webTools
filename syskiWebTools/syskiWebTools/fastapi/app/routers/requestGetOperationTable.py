@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from databases import Database
 import sqlalchemy
 
@@ -21,6 +22,9 @@ async def shutdown():
     await database.disconnect()
 
 async def main():
-    query = view.select()
-    results = await database.fetch_all(query)
-    return {"data": results}
+    try:
+        query = view.select()
+        results = await database.fetch_all(query)
+        return JSONResponse(status_code=200, content={"data": results,"message": "Data uploaded successfully"})
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"data": results,"message": str(e)})

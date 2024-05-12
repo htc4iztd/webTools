@@ -29,7 +29,7 @@ CREATE TABLE task(
 	system_tobe_consideration VARCHAR(30),
 	quarters INTEGER,
 	issues_type VARCHAR(10),
-	issues_seq_no INTEGER,
+	issues_seq_no VARCHAR(10),
 	require_doc_capture_necessity VARCHAR(10),
 	require_doc_capture_version DECIMAL
 );
