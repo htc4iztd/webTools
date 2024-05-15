@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, Form, Body
-from models.models import CategorizedElements, OperationUploadData
+from models.models import CategorizedElements, OperationUploadData, OperationUpdateData
 from routers import dataLoad, multiPrompts, multiEmb, getFileList
 import os
 import logging

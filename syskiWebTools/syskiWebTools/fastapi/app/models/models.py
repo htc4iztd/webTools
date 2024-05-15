@@ -8,3 +8,6 @@ class CategorizedElements(BaseModel):
 
 class OperationUploadData(BaseModel):
     request: List[str]
+
+class OperationUpdateData(BaseModel):
+    request: List[str]
