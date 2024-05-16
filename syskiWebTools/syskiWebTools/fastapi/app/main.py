@@ -1,5 +1,9 @@
+import sys
+import pysqlite3
+sys.modules['sqlite3'] = pysqlite3
+
 from fastapi import FastAPI, File, UploadFile, Form, Body
-from models.models import CategorizedElements, OperationUploadData, OperationUpdateData
+from models.models import CategorizedElements, OperationUploadData
 from routers import dataLoad, multiPrompts, multiEmb, getFileList
 import os
 import logging
@@ -27,18 +31,14 @@ async def root():
     return {"greeting": "Hello World"}
 
 @app.post("/dataLoad")
-async def data_load(file: UploadFile =File(...),collection_name: str=Form(...)):
-## Comment out during ver1.0 development
-# async def dataLoad(file: UploadFile =File(...), processType : str = Form(...)):
+async def data_load(file: UploadFile = File(...), collection_name: str = Form(...)):
     logging.info('START: /dataLoad')
+    logging.info('Upload file name is: %s', file.filename)
     
-    logging.info('Upload file name is: %s',file.filename)
-    
-    save_directory =os.getenv("PDF_SAVE_DIRECTORY")
+    save_directory = os.getenv("PDF_SAVE_DIRECTORY")
     os.makedirs(save_directory, exist_ok=True)
     
-    file_path = os.path.join(save_directory,file.filename)
-    
+    file_path = os.path.join(save_directory, file.filename)
     logging.info(file_path)
     
     with open(file_path, "wb") as buffer:
@@ -46,12 +46,7 @@ async def data_load(file: UploadFile =File(...),collection_name: str=Form(...)):
         buffer.write(content)
     
     categorized_elements = dataLoad.data_load_main(file_path)
-    emb_result = multiEmb.create_vectorstore(categorized_elements,collection_name)
-## Comment out during ver1.0 development
-#     if processType == os.getenv("createCollection"):
-#       emb_result = multiEmb.createVectorstore(categorized_elements)
-#     elif processType == os.getenv("addRecord"):
-#       emb_result = multiEmb.addVectorRecord(categorized_elements)
+    emb_result = multiEmb.create_vectorstore(categorized_elements, collection_name)
 
     logging.info('END: /dataLoad')
 
@@ -62,15 +57,15 @@ async def data_load(file: UploadFile =File(...),collection_name: str=Form(...)):
     return dataLoadResult
 
 @app.post("/multiPrompt")
-async def multi_prompt(seq: str = Form(...),user_input: str = Form(...)):
+async def multi_prompt(seq: str = Form(...), user_input: str = Form(...)):
     logging.info('START: /multi_prompt')
-    promptResult = multiPrompts.multi_prompt(seq,user_input)
+    promptResult = multiPrompts.multi_prompt(seq, user_input)
     logging.info('END: /multi_prompt')
     return promptResult
 
 @app.post("/getFileList")
-def get_file_list(server_address:str = Form(...), directory_path:str = Form(...)):
-    fileList = getFileList.get_file_list(server_address,directory_path)
+def get_file_list(server_address: str = Form(...), directory_path: str = Form(...)):
+    fileList = getFileList.get_file_list(server_address, directory_path)
     return fileList
 
 @app.post("/callFunctionCalling")
@@ -91,7 +86,7 @@ def call_smart_contract(
     amount: int = Body(...),
     recipient: str = Body(...)
 ):
-    result = requestSmartContract.main(address,amount,recipient)
+    result = requestSmartContract.main(address, amount, recipient)
     return result
 
 @app.get("/getJoinedTable")
@@ -100,8 +95,6 @@ def get_joined_table():
     return result
 
 @app.post("/uploadOperationData")
-def upload_operation_Data(
-    request: OperationUploadData
-):
+def upload_operation_data(request: OperationUploadData):
     result = requestOperationDataUpload.main(request)
     return result
