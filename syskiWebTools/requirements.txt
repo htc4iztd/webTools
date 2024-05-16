@@ -24,3 +24,4 @@ selenium
 google-api-python-client
 langchainhub
 web3
+psycopg2

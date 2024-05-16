@@ -17,20 +17,24 @@ import {
 
 function EditableTableForm(){
     const [rows, setRows] = useState([]);
-    const [loading, setLoading] = useState([]);
-    const [loading2, setLoading2] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
     const [fileName, setFileName] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
 
     const fetchTableData = async () => {
         setLoading(true);
         try {
-            const response = await fetch('https://localhost:8080/api/getJoinTable');
+            const response = await fetch('http://localhost:8000/getJoinedTable');
             if(!response.ok){
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            setRows(data);
+            if (data && data.data) {
+                setRows(data);
+            } else {
+                throw new Error('Invalid response format');
+            }
         } catch (error) {
             console.error("Error fetching data: ", error);
             alert('データの取得に失敗しました。');

@@ -3,18 +3,22 @@ import pysqlite3
 sys.modules['sqlite3'] = pysqlite3
 
 from fastapi import FastAPI, File, UploadFile, Form, Body
+from fastapi.responses import JSONResponse
 from models.models import CategorizedElements, OperationUploadData
-from routers import dataLoad, multiPrompts, multiEmb, getFileList
+from routers import dataLoad, multiPrompts, multiEmb, getFileList, requestGetOperationTable, requestOperationDataUpload
 import os
 import logging
 from fastapi.middleware.cors import CORSMiddleware
+from databases import Database
+
+DATABASE_URL = "postgresql://syskiuser:syskipassword@127.0.0.1:5432/syskidatabase"
+database = Database(DATABASE_URL)
 
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 
 origins = [
     "http://localhost:3000",  # Next.jsの開発サーバーのオリジン
-    # 他のオリジンがある場合は追加してください
 ]
 
 # CORSMiddlewareを追加
@@ -25,6 +29,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
 
 @app.get("/")
 async def root():
@@ -74,7 +86,6 @@ def call_function_calling(
     amount: int = Body(...),
     recipient: str = Body(...)
 ):
-    # リクエストの内容をログに記録
     logging.info(f"Received request - address: {address}, amount: {amount}, recipient: {recipient}")
 
     result = functionCalling.main(address, amount, recipient)
@@ -90,11 +101,13 @@ def call_smart_contract(
     return result
 
 @app.get("/getJoinedTable")
-def get_joined_table():
-    result = requestGetOperationTable.main()
-    return result
+async def get_joined_table():
+    result = await requestGetOperationTable.main()
+    if isinstance(result, str):
+        return JSONResponse(status_code=400, content={"message": result})
+    return JSONResponse(status_code=200, content={"data": result, "message": "Data uploaded successfully"})
 
 @app.post("/uploadOperationData")
-def upload_operation_data(request: OperationUploadData):
-    result = requestOperationDataUpload.main(request)
+async def upload_operation_data(request: OperationUploadData):
+    result = await requestOperationDataUpload.main(request)
     return result

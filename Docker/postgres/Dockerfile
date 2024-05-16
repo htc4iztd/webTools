@@ -8,4 +8,4 @@ COPY init.sql /docker-entrypoint-initdb.d/
 
 EXPOSE 5432
 
-VOLUME ["/workspaces/webTools/Docker/postgres/data"]
+VOLUME ["/home/admin/webTools/Docker/postgres/data"]

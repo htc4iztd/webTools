@@ -10,7 +10,7 @@ CREATE TABLE general_mst(
 
 CREATE TABLE issues(
     search_key VARCHAR(100) PRIMARY KEY,
-    withdrawal VARCHAdockeR(100),
+    withdrawal VARCHAR(100),
     seq_no VARCHAR(100),
     seq_branch_no INTEGER,
     issue_name VARCHAR(100),
