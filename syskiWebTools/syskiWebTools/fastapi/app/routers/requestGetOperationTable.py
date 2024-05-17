@@ -21,6 +21,10 @@ view = sqlalchemy.Table(
 
 async def main():
     try:
+        if not database.is_connected:
+            logging.error("Database is not connected")
+            await database.connect()
+
         query = view.select()
         results = await database.fetch_all(query)
         return results
