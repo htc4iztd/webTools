@@ -105,7 +105,7 @@ async def get_joined_table():
     result = await requestGetOperationTable.main()
     if isinstance(result, str):
         return JSONResponse(status_code=400, content={"message": result})
-    return JSONResponse(status_code=200, content={"data": result, "message": "Data uploaded successfully"})
+    return JSONResponse(status_code=200, content={"data": result})
 
 @app.post("/uploadOperationData")
 async def upload_operation_data(request: OperationUploadData):
