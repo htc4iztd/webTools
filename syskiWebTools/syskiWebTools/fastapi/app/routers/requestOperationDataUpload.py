@@ -1,14 +1,13 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import JSONResponse
 from databases import Database
 from sqlalchemy import Table, Column, String, Float, MetaData, insert
 import pandas as pd
+import logging
 
-DATABASE_URL = "postgresql://postgres:6929Mari@localhost/malseDb"
+DATABASE_URL = "postgresql://syskiuser:syskipassword@127.0.0.1:5432/syskidatabase"
 database = Database(DATABASE_URL)
 metadata = MetaData()
-
-app = FastAPI()
 
 operation_manual_input = Table(
     "operations_manual_input", metadata,
@@ -19,22 +18,26 @@ operation_manual_input = Table(
     Column('remarks', String)
 )
 
-@app.on_event("startup")
+router = APIRouter()
+
+@router.on_event("startup")
 async def startup():
     await database.connect()
 
-@app.on_event("shutdown")
+@router.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
 
-@app.post("/uploadOperationData")
+@router.post("/uploadOperationData")
 async def upload_operation_data(file: UploadFile = File(...)):
     try:
-        # Read the CSV file directly from the uploaded file's file-like object
+        if not database.is_connected:
+            logging.error("Database is not connected")
+            await database.connect()
+        
         dataframe = pd.read_csv(file.file)
         
-        # Iterate over the rows of the DataFrame
-        for row in dataframe.iterrows():
+        for _, row in dataframe.iterrows():
             query = insert(operation_manual_input).values(
                 seq_no=row['seq_no'],
                 issue_consideration_status=row['issue_consideration_status'],
@@ -42,7 +45,7 @@ async def upload_operation_data(file: UploadFile = File(...)):
                 other_work_last2wk_time=row['other_work_last2wk_time'],
                 remarks=row['remarks']
             ).on_conflict_do_update(
-                index_elements=['seq_no'],  # Ensure this is the column name that acts as a unique identifier
+                index_elements=['seq_no'],
                 set_=dict(
                     issue_consideration_status=row['issue_consideration_status'],
                     estimated_mtg_last2wk_time=row['estimated_mtg_last2wk_time'],
@@ -50,11 +53,11 @@ async def upload_operation_data(file: UploadFile = File(...)):
                     remarks=row['remarks']
                 )
             )
-            # Execute the query
             await database.execute(query)
         
         return JSONResponse(status_code=200, content={"message": "Data uploaded successfully"})
     except Exception as e:
+        logging.error(f"Upload failed: {str(e)}")
         return JSONResponse(status_code=400, content={"message": str(e)})
 
 if __name__ == "__main__":
