@@ -26,12 +26,12 @@ function EditableTableForm(){
         setLoading(true);
         try {
             const response = await fetch('http://localhost:8000/getJoinedTable');
-            if(!response.ok){
+            if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
             if (data && data.data) {
-                setRows(data);
+                setRows(data.data);
             } else {
                 throw new Error('Invalid response format');
             }
@@ -42,6 +42,7 @@ function EditableTableForm(){
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         fetchTableData();
