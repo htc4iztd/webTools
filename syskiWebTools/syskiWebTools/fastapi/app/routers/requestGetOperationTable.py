@@ -19,15 +19,12 @@ view = sqlalchemy.Table(
     autoload_with=engine  # エンジンを使用
 )
 
-async def main():
+@router.get("/getJoinedTable")
+async def get_joined_table():
     try:
-        if not database.is_connected:
-            logging.error("Database is not connected")
-            await database.connect()
-
         query = view.select()
         results = await database.fetch_all(query)
-        return results
+        return JSONResponse(status_code=200, content={"data": results})
     except Exception as e:
         logging.error(f"Error fetching data: {str(e)}")
-        return str(e)
+        return JSONResponse(status_code=400, content={"message": str(e)})

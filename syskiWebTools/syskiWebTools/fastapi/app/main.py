@@ -100,14 +100,5 @@ def call_smart_contract(
     result = requestSmartContract.main(address, amount, recipient)
     return result
 
-@app.get("/getJoinedTable")
-async def get_joined_table():
-    result = await requestGetOperationTable.main()
-    if isinstance(result, str):
-        return JSONResponse(status_code=400, content={"message": result})
-    return JSONResponse(status_code=200, content={"data": result})
-
-@app.post("/uploadOperationData")
-async def upload_operation_data(request: OperationUploadData):
-    result = await requestOperationDataUpload.main(request)
-    return result
+app.include_router(requestGetOperationTable.router, prefix="/api")
+app.include_router(requestOperationDataUpload.router, prefix="/api")
