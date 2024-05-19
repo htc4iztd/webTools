@@ -25,7 +25,7 @@ function EditableTableForm(){
     const fetchTableData = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/getJoinedTable');
+            const response = await fetch('http://localhost:8000/api/getJoinedTable');
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -119,7 +119,7 @@ function EditableTableForm(){
     
         try {
             // サーバーにファイルをPOST
-            const response = await fetch('http://localhost:8000/uploadOperationData', {
+            const response = await fetch('http://localhost:8000/api/uploadOperationData', {
                 method: 'POST',
                 body: formData,
             });

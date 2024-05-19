@@ -23,6 +23,9 @@ view = sqlalchemy.Table(
 async def get_joined_table():
     try:
         query = view.select()
+        if not database.is_connected:
+            logging.error("DatabaseBackend is not connect. Trying to connect...")
+            await database.connect()
         results = await database.fetch_all(query)
         return JSONResponse(status_code=200, content={"data": results})
     except Exception as e:

@@ -1,0 +1,40 @@
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1055 entries, 0 to 1054
+Data columns (total 33 columns):
+ #   Column     Non-Null Count  Dtype  
+---  ------     --------------  -----  
+ 0   ID         1055 non-null   int64  
+ 1   プロジェクトID   1055 non-null   int64  
+ 2   プロジェクト名    1055 non-null   object 
+ 3   キーID       1055 non-null   int64  
+ 4   キー         1055 non-null   object 
+ 5   種別ID       1055 non-null   int64  
+ 6   種別         1055 non-null   object 
+ 7   カテゴリーID    1055 non-null   float64
+ 8   カテゴリー名     1055 non-null   object 
+ 9   件名         1055 non-null   object 
+ 10  詳細         1055 non-null   object 
+ 11  状態ID       1055 non-null   int64  
+ 12  状態         1055 non-null   object 
+ 13  完了理由ID     1055 non-null   float64
+ 14  完了理由       1055 non-null   object 
+ 15  担当者ID      1055 non-null   float64
+ 16  担当者        1055 non-null   object 
+ 17  登録者ID      1055 non-null   int64  
+ 18  登録者        1055 non-null   object 
+ 19  登録日        1055 non-null   object 
+ 20  親課題キー      1055 non-null   object 
+ 21  期限日        1055 non-null   object 
+ 22  更新者ID      1055 non-null   int64  
+ 23  更新者        1055 non-null   object 
+ 24  更新日        1055 non-null   object 
+ 25  添付         1055 non-null   int64  
+ 26  検討元システム    1055 non-null   object 
+ 27  検討先システム    1055 non-null   object 
+ 28  四半期        1055 non-null   int64  
+ 29  案件種別       1055 non-null   object 
+ 30  案件SEQ No.  1055 non-null   object 
+ 31  要求定義書取込要否  1055 non-null   object 
+ 32  要求定義書取込版数  1055 non-null   object 
+dtypes: float64(3), int64(9), object(21)
+memory usage: 272.1+ KB
