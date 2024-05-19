@@ -102,31 +102,26 @@ async def upload_operation_data(file: UploadFile = File(...)):
             '要求定義書取込要否': '',
             '要求定義書取込版数': 0.0
         })
-        
-        from io import StringIO
-        import os
 
-        # Pandasの表示設定を調整
-        pd.set_option('display.max_rows', None)
-        pd.set_option('display.max_columns', None)
-        pd.set_option('display.max_colwidth', None)
-        pd.set_option('display.expand_frame_repr', False)
-        
+        # 整数型に変換するカラムを指定
+        int_columns = ['ID', 'プロジェクトID', 'キーID', '種別ID', 'カテゴリーID', '状態ID', '完了理由ID', 
+                       '担当者ID', '登録者ID', '親課題キー', '更新者ID', '添付', '四半期']
+        for col in int_columns:
+            dataframe[col] = dataframe[col].astype(int)
+
+        # テキストファイルに保存
         output_directory = "/home/admin/webTools"
         os.makedirs(output_directory, exist_ok=True)
-        
-        dataframe_str = dataframe.to_string()
-        
+
+        dataframe_file_path = os.path.join(output_directory, "dataframe_contents.txt")
+        dataframe.to_csv(dataframe_file_path, index=False, sep='\t', encoding='utf-8')
+        logging.info(f"DataFrame contents written to {dataframe_file_path}")
+
+        # データフレームの情報をファイルに出力
         buffer = StringIO()
         dataframe.info(buf=buffer)
         info_str = buffer.getvalue()
         
-        dataframe_file_path = os.path.join(output_directory, "dataframe_contents.txt")
-        with open(dataframe_file_path, "w", encoding="utf-8") as f:
-            f.write(dataframe_str)
-        logging.info(f"DataFrame contents written to {dataframe_file_path}")
-        
-        # データフレームの情報をファイルに出力
         info_file_path = os.path.join(output_directory, "dataframe_info.txt")
         with open(info_file_path, "w", encoding="utf-8") as f:
             f.write(info_str)
