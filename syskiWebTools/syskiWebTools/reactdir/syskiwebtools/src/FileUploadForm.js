@@ -1,5 +1,6 @@
 import React, { useState, useEffect }  from 'react';
 import animation from "./loading.gif";
+import downloadImage from "./logo.svg";
 import {
     Button,
     Modal,
@@ -129,10 +130,7 @@ function FileUploadForm(){
                         boxShadow: 24,
                         padding: 4,
                     }}>
-                        <image
-                          class="csvDownloadPic"
-                          src="./logo.svg"
-                          alt="Image for explanation of CSV download." />
+                        <image src={downloadImage} alt="Image for explanation of CSV download." />
                     </div>
                 </Fade>
             </Modal>
