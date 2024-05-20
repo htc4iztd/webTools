@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect }  from 'react';
+import React, { useState, useEffect } from 'react';
+import animation from "./loading.gif";
 import {
     Table,
     TableBody,
@@ -8,22 +9,27 @@ import {
     TableRow,
     TextField,
     Paper
-  } from '@mui/material';
-  
+} from '@mui/material';
 
 function EditableTableForm(){
     const [rows, setRows] = useState([]);
-    const [loading, setLoading] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const fetchTableData = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8080/getJoinTable');
-            if(!response.ok){
+            const response = await fetch('http://localhost:8000/api/getJoinedTable');
+            if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            setRows(data);
+            // データが配列かどうか確認し、配列でない場合は空配列をセット
+            if (Array.isArray(data)) {
+                setRows(data);
+            } else {
+                console.error("Fetched data is not an array:", data);
+                setRows([]);
+            }
         } catch (error) {
             console.error("Error fetching data: ", error);
             alert('データの取得に失敗しました。');
@@ -47,7 +53,7 @@ function EditableTableForm(){
             <form onSubmit={handleSubmitTable}>
                 <h2>稼働管理表</h2>
                 {loading ? (
-                    <p>Loading...</p>
+                    <img src={animation} alt="ローディングアニメーション"/>
                 ) : (
                     <TableContainer component={Paper}>
                         <Table>
@@ -78,50 +84,32 @@ function EditableTableForm(){
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {rows.map((row) => (
+                                {Array.isArray(rows) && rows.map((row) => (
                                     <TableRow key={row.seq_no}>
                                         <TableCell>
-                                            <TextField>
-                                                type="helperText"
-                                                value={row.seq_no}
-                                            </TextField>
+                                            <TextField value={row.seq_no} />
                                         </TableCell>
                                         <TableCell>
-                                            <TextField>
-                                                type="helperText"
-                                                value={row.project}
-                                            </TextField>
+                                            <TextField value={row.project} />
                                         </TableCell>
                                         <TableCell>
-                                            <TextField>
-                                                type="helperText"
-                                                value={row.team}
-                                            </TextField>
+                                            <TextField value={row.team} />
                                         </TableCell>
                                         <TableCell>
-                                            <TextField>
-                                                type="helperText"
-                                                value={row.prsnInChrg}
-                                            </TextField>
+                                            <TextField value={row.prsnInChrg} />
                                         </TableCell>
                                         <TableCell>
-                                            <TextField>
-                                                type="helperText"
-                                                value={row.prjctSize}
-                                            </TextField>
+                                            <TextField value={row.prjctSize} />
                                         </TableCell>
                                         <TableCell>
-                                            <TextField>
-                                                type="helperText"
-                                                value={row.prjctSts}
-                                            </TextField>
+                                            <TextField value={row.prjctSts} />
                                         </TableCell>
                                         <TableCell>
-                                            {
-                                                row.prjctSts === '要求定義中' ?
-                                                <TextField value={row.prjctMnHrsValue}/>:
+                                            {row.prjctSts === '要求定義中' ? (
+                                                <TextField value={row.prjctMnHrsValue}/>
+                                            ) : (
                                                 <TextField value="-"/>
-                                            }
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <TextField value={row.remainTaskSys} />                                                    
@@ -133,32 +121,30 @@ function EditableTableForm(){
                                             <TextField value={row.crspndMnHrs} />                                                    
                                         </TableCell>
                                         <TableCell>
-                                            <TextField type="helperText" value={row.estMtgTimeTwWks} />
+                                            <TextField value={row.estMtgTimeTwWks} />
                                         </TableCell>
                                         <TableCell>
-                                            {
-                                                row.prjctSts === '要求定義中' ?
-                                                <TextField value={row.mtgMnHrs} />:
+                                            {row.prjctSts === '要求定義中' ? (
+                                                <TextField value={row.mtgMnHrs} />
+                                            ) : (
                                                 <TextField value="-"/>
-                                            }
+                                            )}
                                         </TableCell>
                                         <TableCell>
-                                            <TextField type="helperText" value={row.estwkTimeTwWks} />
+                                            <TextField value={row.estwkTimeTwWks} />
                                         </TableCell>
                                         <TableCell>
-                                            {
-                                                row.prjctSts === '要求定義中' ?
-                                                <TextField value={row.wkMnHrs} />:
+                                            {row.prjctSts === '要求定義中' ? (
+                                                <TextField value={row.wkMnHrs} />
+                                            ) : (
                                                 <TextField value="-"/>
-                                            }
+                                            )}
                                         </TableCell>
                                         <TableCell>
-                                            {
-                                                row.prjctMnHrsValue + row.crspndMnHrs + row.mtgMnHrs + row.wkMnHrs
-                                            }
+                                            {row.prjctMnHrsValue + row.crspndMnHrs + row.mtgMnHrs + row.wkMnHrs}
                                         </TableCell>
                                         <TableCell>
-                                            <TextField type="helperText" value={row.remarks} />
+                                            <TextField value={row.remarks} />
                                         </TableCell>
                                     </TableRow>
                                 ))}

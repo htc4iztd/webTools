@@ -3,7 +3,7 @@ import DropdownMenu from './DropdownMenu';
 import CustomAttributeForm from './CustomAttributeForm';
 import IssuesForm from './IssuesForm';
 import EditableTableForm from './EditableTableForm';
-import FileUproadForm from './FileUproadForm';
+import FileUploadForm from './FileUploadForm';
 import CountTask from './CountTask';
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import ErrorBoundary from './ErrorBoundary';
@@ -13,7 +13,7 @@ function App() {
 
     const manageMenuItems = [
         { label: '稼働状況照会', api: 'editableTable' },
-        { label: '各種ファイルアップロード', api: 'fileUproad'},
+        { label: '各種ファイルアップロード', api: 'fileUpload'},
     ];
 
     const userMenuItems = [
@@ -35,7 +35,7 @@ function App() {
                 {currentApi === 'customAttribute' && <CustomAttributeForm />}
                 {currentApi === 'issues' && <IssuesForm />}
                 {currentApi === 'editableTable' && <EditableTableForm />}
-                {currentApi === 'fileUproad' && <FileUproadForm />}
+                {currentApi === 'fileUpload' && <FileUploadForm />}
                 {currentApi === 'countTask' && <CountTask />}
             </div>
         </ErrorBoundary>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect }  from 'react';
+import animation from "./loading.gif";
 import {
     Button,
     Modal,
@@ -8,7 +9,7 @@ import {
   
 
 function FileUploadForm(){
-    const [loading2, setLoading2] = useState([]);
+    const [loading2, setLoading2] = useState(false);
     const [fileName, setFileName] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -77,7 +78,7 @@ function FileUploadForm(){
     
         try {
             // サーバーにファイルをPOST
-            const response = await fetch('http://localhost:8000/uploadOperationData', {
+            const response = await fetch('http://localhost:8000/api/uploadOperationData', {
                 method: 'POST',
                 body: formData,
             });
@@ -128,8 +129,10 @@ function FileUploadForm(){
                         boxShadow: 24,
                         padding: 4,
                     }}>
-                        {/* ここにダウンロード方法の説明を入れる */}
-                        <p>CSVダウンロードの手順をここに記載します。</p>
+                        <image
+                          class="csvDownloadPic"
+                          src="./logo.svg"
+                          alt="Image for explanation of CSV download." />
                     </div>
                 </Fade>
             </Modal>
@@ -149,7 +152,7 @@ function FileUploadForm(){
                 <FileUploadButton onFileSelect={handleFileSelect} />
                 <input className="submitButton" type="submit" value="CSVアップロード" />
                 <CsvDownloadModal open={openModal} handleClose={handleCloseModal} />
-                {loading2 && <p>Loading...</p>}
+                {loading2 && <image src={animation} alt="ローディングアニメーション"/>}
             </form>
         </React.Fragment>
     );
