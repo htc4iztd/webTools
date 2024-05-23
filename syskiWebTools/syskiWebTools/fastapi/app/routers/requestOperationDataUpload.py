@@ -21,8 +21,8 @@ tasks = Table(
     Column('key', String(50)),
     Column('type_id', Integer),
     Column('type', String(30)),
-    Column('category_id', Integer),
-    Column('category_name', String(10)),
+    Column('category_id', Integer), # 小数点になっている
+    Column('category_name', String(10)), # 小数点になっている
     Column('subject', String(1000)),
     Column('description', Text),
     Column('status_id', Integer),
@@ -107,7 +107,7 @@ async def upload_operation_data(file: UploadFile = File(...)):
         int_columns = ['ID', 'プロジェクトID', 'キーID', '種別ID', 'カテゴリーID', '状態ID', '完了理由ID', 
                        '担当者ID', '登録者ID', '親課題キー', '更新者ID', '添付', '四半期']
         for col in int_columns:
-            dataframe[col] = dataframe[col].astype(int)
+            dataframe[col] = dataframe[col].apply(lambda x: int(float(x)))  # 変換後に整数型に変更
 
         # テキストファイルに保存
         output_directory = "/home/admin/webTools"
